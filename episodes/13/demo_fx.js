@@ -30,6 +30,9 @@ function fbScene(t) {
   const hit = 3.0;
   // Nurettin swings a hammer from inside
   const k = prog(ft, 2.0, hit), back = prog(ft, hit, hit + .5);
+  { const hx = lerp(820, 700, ease.inOut(k)) + back * 60, hy = lerp(560, 800, k), hr = (lerp(-60, 0, k) - back * 25) * Math.PI / 180;
+    const gx = hx + Math.cos(hr) * 180, gy = hy + Math.sin(hr) * 180, sx = lerp(900, 840, k) + back * 40 + 130, sy = 1090;
+    s += `<path d="M${sx},${sy} Q${(sx + gx) / 2 + 40},${(sy + gy) / 2 + 30} ${gx},${gy}" stroke="#6b3e26" stroke-width="46" fill="none" stroke-linecap="round"/><circle cx="${gx}" cy="${gy}" r="26" fill="#eebd96"/>`; }
   s += `<g transform="translate(${lerp(900, 840, k) + back * 40} 960) scale(1.05)">${person(ft, Object.assign({ smile: -6 }, LOOK.nurettin))}</g>`;
   s += `<g transform="translate(${lerp(820, 700, ease.inOut(k)) + back * 60} ${lerp(560, 800, k)}) rotate(${lerp(-60, 0, k) - back * 25})"><rect x="0" y="-10" width="200" height="20" rx="6" fill="#7a4a24"/><rect x="-40" y="-44" width="60" height="88" rx="8" fill="#5f6672"/></g>`;
   if (ft >= hit) {
