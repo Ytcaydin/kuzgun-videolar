@@ -85,3 +85,12 @@ def mix(voice_path, events, out, dur, bed_gain=.32, sfx_gain=1.0):
     y = vo + b + fx
     y = np.stack([y, y], 1)
     wavfile.write(out, SR, (y / max(1, np.abs(y).max()) * .95).astype(np.float32))
+
+def projector(d=4.0):
+    t = t_(d); n = len(t); x = np.zeros(n)
+    for k in range(int(d * 24)):
+        st = int(k / 24 * SR); m = min(int(.012 * SR), n - st)
+        if m > 0: x[st:st + m] += hp(R.standard_normal(m), 1800) * np.exp(-np.arange(m) / SR * 300)
+    x += lp(R.standard_normal(n), 500) * .15
+    fade = np.clip(t / .3, 0, 1) * np.clip((d - t) / .4, 0, 1)
+    return norm(x * fade, .4)

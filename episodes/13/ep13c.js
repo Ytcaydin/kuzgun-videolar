@@ -4,6 +4,7 @@ const wT = (i, w, end = false) => { const x = L[i].words.find(v => v[0].toLowerC
 const speaking = (i, t) => L[i].words.some(w => t >= w[1] - .02 && t <= w[2] + .02);
 const cut = i => (L[i].end + L[i + 1].start) / 2;
 const CHIP = 'DOSYA #13 · ÇÖZÜM';
+const LOOKS_READY = true;
 
 // Side-view diagram: window pane at x=540, outside left (pavement), inside right (shop floor)
 function sideView(t, o) {
@@ -54,38 +55,67 @@ S.push({ a: 0, b: cut(0), draw: (t) => {
   s += stamp(t, tz + .25, W / 2, 1110, 'TUZAK', { size: 130, rot: -6 });
   return s + caption(t, L[0], 1440);
 } });
-// 1: rule — outside hit, shards fall in
+// 1: rule — blueprint: outside hit, shards fall in
+function bpPane(t, broken) {
+  let g = bpPath('M90,1260H990', 4) + bpPath('M540,400V1270', 2, { dash: '48 12 6 12' });
+  if (!broken) g += bpPath('M530,520H550V1180H530Z', 5);
+  else g += bpPath('M530,520H550V600L540,640L530,610Z', 5) + bpPath('M530,1180H550V1100L540,1070L530,1110Z', 5);
+  g += bpPath('M520,1180H560V1260H520Z', 3) + bpPath('M520,440H560V520H520Z', 3);
+  g += bpLabel(290, 470, 'DIŞARI', { size: 44 }) + bpLabel(790, 470, 'İÇERİ', { size: 44 });
+  g += bpLabel(290, 1310, 'KALDIRIM', { size: 26 }) + bpLabel(790, 1310, 'DÜKKÂN ZEMİNİ', { size: 26 });
+  return g;
+}
 S.push({ a: cut(0), b: cut(1), draw: (t) => {
-  const hit = wT(1, 'kırılırsa') + .1;
-  let s = sideView(t, { hit, dir: 1, obj: 'stone', seed: 5 }) + chip(CHIP, 250) + header('FİZİK KURALI', 340, C.gold);
-  s += tag(t, wT(1, 'Cam'), 270, 640, 'DARBE DIŞARIDAN', { bg: C.navy, rot: -3 });
-  s += tag(t, wT(1, 'içeri'), 810, 1060, 'KIRIKLAR İÇERİ', { rot: 3 });
-  return s + caption(t, L[1], 1440);
+  const hit = wT(1, 'kırılırsa'), ki = wT(1, 'içeri');
+  let s = blueprintBg({ title: 'DELİL 13-A · CAM KURALI', code: 'ÖLÇEK 1:20' }) + chip(CHIP, 140) + bpLabel(W / 2, 260, 'CAM NASIL KIRILIR?', { size: 48 });
+  let g = bpPane(t, t > hit + .1);
+  const k1 = prog(t, hit - .6, hit + .1);
+  g += bpArrow(120, 820, 515, 820, ease.out(k1), { w: 7 }) + (k1 > 0 ? bpLabel(300, 790, 'DARBE', { size: 36 }) : '');
+  const k2 = prog(t, ki - .2, ki + .6);
+  if (k2 > 0) for (let i = 0; i < 7; i++) { const y = 640 + i * 70; g += bpArrow(565, y, 700 + (i % 3) * 60, Math.min(1240, y + 160 + i * 30), ease.out(k2), { w: 3, head: 16, dash: '10 7' }); }
+  if (k2 > .5) for (let i = 0; i < 9; i++) { const x = 600 + i * 42; g += bpPath(`M${x},1255l12,-18l12,18Z`, 2); }
+  s += bpInk(g);
+  if (k2 > 0) s += `<g opacity="${k2}">${txt(W / 2, 1460, 'DIŞARIDAN DARBE → KIRIKLAR İÇERİ', { size: 40, fill: '#ffd23f', family: MONO, weight: 700 })}</g>`;
+  return s + caption(t, L[1], 1640);
 } });
-// 2: the actual scene — inside clean, everything outside
+// 2: blueprint — the evidence: inside 0, all outside
 S.push({ a: cut(1), b: cut(2), draw: (t) => {
-  let s = sideView(t, { hit: -10, dir: 0, seed: 1 }) + chip(CHIP, 250) + header('NURETTİN ANTİKA · 05:10', 340, '#cfd6e6');
-  // remove the default shards; draw real evidence
-  s += `<rect x="0" y="560" width="${W}" height="610" fill="#0e1424" opacity="0"/>`;
-  s += shards(t, 40, 1120, 460, 70, 70, 41, .9);
   const k1 = wT(2, 'içinde'), k2 = wT(2, 'Hepsi');
-  if (t > k1) { const k = ease.out(prog(t, k1, k1 + .35)); s += `<ellipse cx="810" cy="1150" rx="${230 * k}" ry="${90 * k}" fill="none" stroke="${C.yellow}" stroke-width="10"/>`; }
-  s += tag(t, wT(2, 'parça'), 810, 1010, 'İÇERİDE 0 PARÇA', { bg: C.navy, rot: 3 });
-  if (t > k2) { const k = ease.out(prog(t, k2, k2 + .35)); s += `<ellipse cx="270" cy="1150" rx="${250 * k}" ry="${90 * k}" fill="none" stroke="${C.red}" stroke-width="10"/>`; }
-  s += tag(t, k2 + .1, 270, 1010, 'HEPSİ DIŞARIDA', { rot: -3 });
-  return s + caption(t, L[2], 1440);
+  let s = blueprintBg({ title: 'DELİL 13-B · OLAY YERİ', code: 'NURETTİN ANTİKA · 05:10' }) + chip(CHIP, 140) + bpLabel(W / 2, 260, 'KIRIKLAR NEREDEYDİ?', { size: 48 });
+  let g = bpPane(t, true);
+  const r = rng(41);
+  for (let i = 0; i < 22; i++) { const x = 110 + r() * 380, y = 1250 - r() * 20; g += bpPath(`M${x},${y}l${8 + r() * 10},-${10 + r() * 14}l${8 + r() * 10},${10 + r() * 14}Z`, 2); }
+  s += bpInk(g);
+  s += bpCircle(790, 1235, 240, 70, prog(t, k1, k1 + .6));
+  if (t > k1 + .3) s += txt(790, 1150, 'İÇERİDE: 0 PARÇA', { size: 40, fill: '#ff6a5a', family: MONO, weight: 700 });
+  s += bpCircle(300, 1235, 240, 70, prog(t, k2, k2 + .6), '#ffd23f');
+  if (t > k2 + .3) s += txt(300, 1150, 'DIŞARIDA: HEPSİ', { size: 40, fill: '#ffd23f', family: MONO, weight: 700 });
+  return s + caption(t, L[2], 1640);
 } });
-// 3: it was broken from inside
+// 3: silent-film flashback — broken from inside
+const SIL = '<filter id="sil"><feColorMatrix values="0 0 0 0 .05  0 0 0 0 .05  0 0 0 0 .07  0 0 0 1 0"/></filter>';
 S.push({ a: cut(2), b: cut(3), draw: (t) => {
-  const hit = wT(3, 'içeriden') + .15, q = wT(3, 'İçeride');
-  let s = sideView(t, { hit, dir: -1, obj: 'hammer', seed: 9 }) + chip(CHIP, 250) + header('VİTRİN NASIL KIRILDI?', 340, C.gold);
-  s += tag(t, hit + .1, 270, 640, 'İÇERİDEN KIRILDI', { rot: -3 });
-  if (t > q) {
-    const k = ease.out(prog(t, q, q + .4));
-    s += `<g opacity="${k}" transform="translate(830 ${lerp(900, 860, k)}) scale(.95)"><g filter="url(#soft)">${person(t, Object.assign({}, LOOK.nurettin))}</g>
-      <rect x="-230" y="-220" width="460" height="560" fill="#05070c" opacity=".55"/>${txt(0, -10, '?', { size: 200, fill: C.yellow })}</g>`;
+  const t0 = cut(2), ft = filmTime(t), hit = wT(3, 'içeriden') + .1, q = wT(3, 'İçeride');
+  let s = `<defs>${SIL}</defs><rect width="${W}" height="${H}" fill="#2a2230"/>`;
+  for (let r = 0; r < 8; r++) for (let c = 0; c < 9; c++) s += `<rect x="${c * 120}" y="${1250 + r * 90}" width="120" height="90" fill="${(r + c) % 2 ? '#d8cfbd' : '#3d3440'}"/>`;
+  s += `<rect x="80" y="420" width="560" height="760" fill="#0b0f18"/><rect x="60" y="1180" width="600" height="30" fill="#5b3a22"/>`;
+  if (ft < hit) s += `<rect x="80" y="420" width="560" height="760" fill="url(#glass)"/>`;
+  const k = prog(ft, hit - 1, hit), back = prog(ft, hit, hit + .5), px = lerp(900, 840, k) + back * 40;
+  const lit = t > q;
+  { const hx = lerp(820, 700, ease.inOut(k)) + back * 60, hy = lerp(560, 800, k), hr = (lerp(-60, 0, k) - back * 25) * Math.PI / 180;
+    const gx = hx + Math.cos(hr) * 180, gy = hy + Math.sin(hr) * 180;
+    s += `<g ${lit ? '' : 'filter="url(#sil)"'}><path d="M${px + 130},1090 Q${(px + 130 + gx) / 2 + 40},${(1090 + gy) / 2 + 30} ${gx},${gy}" stroke="#6b3e26" stroke-width="46" fill="none" stroke-linecap="round"/><circle cx="${gx}" cy="${gy}" r="26" fill="#eebd96"/>
+      <g transform="translate(${px} 960) scale(1.05)">${person(ft, Object.assign({ smile: -6 }, LOOK.nurettin))}</g>
+      <g transform="translate(${hx} ${hy}) rotate(${hr * 180 / Math.PI})"><rect x="0" y="-10" width="200" height="20" rx="6" fill="#7a4a24"/><rect x="-40" y="-44" width="60" height="88" rx="8" fill="#5f6672"/></g></g>`; }
+  if (lit) s += `<circle cx="${px}" cy="900" r="${300}" fill="url(#lamp)" opacity=".35"/>`;
+  if (ft >= hit) {
+    const r = rng(7), kk = prog(ft, hit, hit + 1.1);
+    s += `<path d="M80,420 L640,420 L640,470 L560,450 L500,520 L420,460 L330,540 L250,470 L170,560 L80,500Z" fill="#cfeaff" opacity=".35"/>`;
+    for (let i = 0; i < 26; i++) { const y0 = 520 + r() * 600, vx = -(80 + r() * 420); const x = 600 + vx * ease.out(kk), y = lerp(y0, y0 + 200 + r() * 200, kk * kk); s += `<polygon points="${x},${y - 14} ${x + 14},${y + 8} ${x - 10},${y + 9}" fill="#e6f3ff" opacity=".8"/>`; }
   }
-  return s + caption(t, L[3], 1440);
+  s += txt(W / 2, 330, 'O GECE · 05:09', { size: 48, fill: '#ece8dd', family: SERIF, weight: 700, ls: 6 });
+  if (lit) s += txt(840, 1420, '?', { size: 0, fill: '#000' });
+  return flashback(t, s, { iris: [t0 - .1, t0 + .45, 99, 100], cx: 520, cy: 860, sepia: true }) + caption(t, L[3], 1640);
 } });
 // 4: coins never stolen + insurance
 S.push({ a: cut(3), b: cut(4), draw: (t) => {

@@ -18,5 +18,6 @@ for w in L[5]['words']:
         if j % 2 == 0: E_.append((w[1] + (w[2] - w[1]) * j / max(1, len(w[0])), key(), .18))
 E_ += [(wT(6, 'Sahte'), stamp(), .7), (wT(6, 'Sahte'), boom(), .35), (cut(6) - .15, whoosh(), .45), (cut(6), caw(), .45),
        (L[7]['start'] - .1, pop(), .4), (L[7]['end'] + .5, caw(), .5)]
+E_ += [(cut(2) - .05, projector(cut(3) - cut(2) + .1), .35)]
 mix('voice-cozum.wav', E_, 'mix-cozum.wav', D)
 print('ok', D)
