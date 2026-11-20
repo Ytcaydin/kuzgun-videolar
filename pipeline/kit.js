@@ -204,7 +204,7 @@ function compose(t, scenes, o = {}) {
 function blurDefs() { let s = '<defs>'; for (let i = 1; i <= 18; i++) s += `<filter id="mb${i}" x="-10%" y="0" width="120%" height="100%"><feGaussianBlur stdDeviation="${i} 0"/></filter>`; return s + '</defs>'; }
 
 function frame(t, body, overlay = '') {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${defs()}${blurDefs()}
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${defs()}${blurDefs()}${typeof fxDefs === 'function' ? fxDefs() : ''}
   <rect width="${W}" height="${H}" fill="${C.bg}"/>${body}${overlay}
   <rect width="${W}" height="${H}" fill="url(#vig)"/></svg>`;
 }

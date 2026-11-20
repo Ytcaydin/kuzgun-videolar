@@ -6,3 +6,9 @@
 4. `finish.sh raw.mp4 mix.wav out.mp4` — renk/grain, -14 LUFS, H.264
 
 Bölüm dosyaları `episodes/NN/` altında. Çalıştırırken tüm dosyaları aynı klasöre koy.
+
+## Özel sahne görünümleri (fx.js)
+- `flashback(t, svg, {iris, sepia})` + `intertitle()` + `filmTime()` — sessiz film / "o gece" geri dönüş sahneleri
+- `blueprintBg()`, `bpInk()`, `bpPath()`, `bpArrow()`, `bpDim()`, `bpCircle()` — mavi teknik çizim delil diyagramları
+- Örnek: `episodes/13/demo_fx.js` (`render.py demo_fx.js tl-demo.json out.mp4 --libs fx.js,ep13art.js`)
+- Teknikler deenukhan/animation-styles'tan (MIT) uyarlandı; bkz. NOTICE.
