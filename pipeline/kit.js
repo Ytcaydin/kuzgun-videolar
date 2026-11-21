@@ -98,9 +98,13 @@ function statement(t, line, x, y, w, h, o = {}) {
    ${txt(40, 46, o.title || 'İFADE TUTANAĞI', { size: 24, fill: '#a33', anchor: 'start', family: MONO, weight: 700, ls: 2 })}`;
   if (line) {
     const text = '"' + line.text + '"';
-    // characters revealed in sync with spoken words
+    // characters revealed following the speech-activity curve (slightly ahead so reading keeps pace)
     let n = 1;
-    for (const [wd, a, b] of line.words) {
+    if (line.type) {
+      const tt = t + .12, P = line.type; let f = 0;
+      if (tt >= P[P.length - 1][0]) f = 1; else if (tt > P[0][0]) { let i = 1; while (P[i][0] < tt) i++; const [t0, f0] = P[i - 1], [t1, f1] = P[i]; f = f0 + (f1 - f0) * (tt - t0) / Math.max(1e-3, t1 - t0); }
+      n = 1 + Math.round(f * (text.length - 2));
+    } else for (const [wd, a, b] of line.words) {
       if (t >= b) { n += wd.length + 1; continue; }
       if (t > a) n += Math.round(wd.length * (t - a) / Math.max(.05, b - a));
       break;

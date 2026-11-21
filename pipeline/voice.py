@@ -24,7 +24,7 @@ def word_times(words, spans):
                 if c<dp[j][i]: dp[j][i]=c; bk[j][i]=k
     cuts=[]; i=n
     for j in range(m,0,-1): k=bk[j][i]; cuts.append((k,i)); i=k
-    cuts=cuts[::-1]; W=[]
+    cuts=cuts[::-1]; W=[]; GR=[]
     for (k,i),(sa,sb,nuc) in zip(cuts,spans):
         ws=words[k:i]; vv=wv[k:i]; V=sum(vv); nuc=sorted(nuc)
         starts=[]; c=0
@@ -37,7 +37,8 @@ def word_times(words, spans):
             starts.append(max(st, starts[-1]+0.08 if starts else st)); c+=vv[q]
         for q,w in enumerate(ws):
             en=starts[q+1] if q+1<len(ws) else sb
-            W.append((w,round(starts[q],3),round(max(en,starts[q]+0.08),3)))
+            W.append((w,round(starts[q],3),round(max(en,starts[q]+0.08),3),len(GR)))
+        GR.append((sa,sb))
     return W
 
 def build(fn, lines, out, lead=0.2, gap=0.42, inner=0.28, tail=1.8, extra_gap=None):
@@ -66,7 +67,42 @@ def build(fn, lines, out, lead=0.2, gap=0.42, inner=0.28, tail=1.8, extra_gap=No
         tl.append(dict(l,start=round(start,3),end=round(t,3),words=W))
     pieces.append(np.zeros(int(tail*SR),np.float32)); t+=tail
     y=np.concatenate(pieces); wavfile.write(out,SR,y)
+    retime(y,tl)
     return dict(duration=round(t,3),lines=tl)
+
+def retime(y,tl):
+    # speech-activity curve: typing/captions advance only while the voice is actually sounding
+    from scipy.signal import butter,sosfiltfilt
+    yb=sosfiltfilt(butter(4,[250,3500],'band',fs=SR,output='sos'),y)
+    h=int(.01*SR); e=np.sqrt(np.convolve(yb**2,np.ones(h)/h,'same')[::h]+1e-12)
+    db=20*np.log10(e); ref=np.percentile(db[db>-80],95)
+    act=np.clip((db-(ref-28))/18,0,1)          # 0 silence .. 1 full speech
+    for l in tl:
+        words=[w[0] for w in l['words']]; gid=[w[3] for w in l['words']]
+        wt=np.array([0.7*max(vow(w),.6)+0.3*len(w)/3 for w in words])
+        chars=np.array([len(w)+1 for w in words],float); Ctot=chars.sum()
+        T=np.zeros(len(words)); curve=[]; cbase=0.0
+        groups=sorted(set(gid))
+        for g in groups:
+            idx=[k for k in range(len(words)) if gid[k]==g]
+            ga=min(l['words'][k][1] for k in idx); gb=max(l['words'][k][2] for k in idx)
+            i0,i1=int(ga*100),int(gb*100)+1; a=act[i0:i1]
+            c=np.concatenate([[0],np.cumsum(a)]); c/=max(c[-1],1e-9); times=ga+np.arange(len(c))/100
+            F=np.concatenate([[0],np.cumsum(wt[idx])])/wt[idx].sum()
+            T[idx]=np.interp(F[:-1],c,times)
+            Cg=np.concatenate([[0],np.cumsum(chars[idx])])/Ctot
+            CF=cbase+np.interp(c,F,Cg)
+            curve+= [[round(float(times[k]),2),round(float(CF[k]),3)] for k in range(0,len(c),4)]+[[round(float(times[-1]),2),round(float(CF[-1]),3)]]
+            cbase=float(CF[-1])
+        W=[[w,round(float(T[k]),3),0] for k,w in enumerate(words)]
+        for k in range(len(W)):
+            if k: W[k][1]=max(W[k][1],W[k-1][1]+.06)
+            nxt=W[k+1][1] if k+1<len(W) else l['end']
+        for k in range(len(W)):
+            W[k][2]=round(float(T[k+1] if k+1<len(W) and gid[k+1]==gid[k] else l['words'][k][2]),3)
+        l['type']=curve+[[round(l['end'],2),1.0]]
+        l['words']=[tuple(w) for w in W]
+
 if __name__=='__main__':
     spec=json.load(open(sys.argv[1]))
     r=build(spec['wav'],spec['lines'],spec['out'],**spec.get('opts',{}))
