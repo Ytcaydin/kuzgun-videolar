@@ -79,10 +79,11 @@ function caption(t, line, y = 1290, o = {}) {
   if (!line || t < line.start - .05 || t > line.end + .25) return '';
   const ch = chunks(line.words, o.maxChars || 13);
   let cur = ch[0];
-  for (const c of ch) if (t >= c[0][1] - .04) cur = c;
+  if (t < ch[0][0][1] + .03) return '';
+  for (const c of ch) if (t >= c[0][1] + .03) cur = c;
   const size = o.size || 74;
-  const appear = ease.back(prog(t, cur[0][1] - .04, cur[0][1] + .12));
-  const spans = cur.map(w => { const on = t >= w[1] - .04 && t < w[2] + .08; return `<tspan fill="${on ? (o.hi || C.yellow) : '#fff'}">${esc(w[0])}</tspan>`; }).join(' ');
+  const appear = ease.back(prog(t, cur[0][1] + .03, cur[0][1] + .15));
+  const spans = cur.map(w => { const said = t >= w[1] + .03, on = said && t < w[2] + .08; return said ? `<tspan fill="${on ? (o.hi || C.yellow) : '#fff'}">${esc(w[0])}</tspan>` : `<tspan fill="none" stroke="none">${esc(w[0])}</tspan>`; }).join(' ');
   let s = `<g transform="translate(${W / 2} ${y}) scale(${lerp(.85, 1, appear)})">
     <text x="0" y="0" font-family="${FONT}" font-size="${size}" font-weight="900" text-anchor="middle" stroke="#111" stroke-width="14" stroke-linejoin="round" paint-order="stroke" filter="url(#cshadow)">${spans}</text>`;
   return s + '</g>';
@@ -101,7 +102,7 @@ function statement(t, line, x, y, w, h, o = {}) {
     // characters revealed following the speech-activity curve (slightly ahead so reading keeps pace)
     let n = 1;
     if (line.type) {
-      const tt = t + .12, P = line.type; let f = 0;
+      const tt = t - .03, P = line.type; let f = 0;
       if (tt >= P[P.length - 1][0]) f = 1; else if (tt > P[0][0]) { let i = 1; while (P[i][0] < tt) i++; const [t0, f0] = P[i - 1], [t1, f1] = P[i]; f = f0 + (f1 - f0) * (tt - t0) / Math.max(1e-3, t1 - t0); }
       n = 1 + Math.round(f * (text.length - 2));
     } else for (const [wd, a, b] of line.words) {
