@@ -41,10 +41,13 @@ def word_times(words, spans):
         GR.append((sa,sb))
     return W
 
-def build(fn, lines, out, lead=0.2, gap=0.42, inner=0.28, tail=1.8, extra_gap=None):
+def build(fn, lines, out, lead=0.2, gap=0.42, inner=0.28, tail=1.8, extra_gap=None, rec_order=None):
     S,_=segs(fn); S=[s for s in S if s[1]-s[0]>0.1]
     NUC=nuclei(fn)
-    groups=align(S,[l['text'] for l in lines])
+    order=rec_order or list(range(len(lines)))
+    grec=align(S,[lines[i]['text'] for i in order])
+    groups=[None]*len(lines)
+    for k,i in enumerate(order): groups[i]=grec[k]
     raw=subprocess.check_output(['ffmpeg','-nostdin','-v','error','-i',fn,'-af',f'atempo={TEMPO}','-ac','1','-ar',str(SR),'-f','f32le','-'])
     x=np.frombuffer(raw,np.float32)
     T=lambda t:int(t/TEMPO*SR)
