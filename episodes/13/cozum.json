@@ -1,10 +1,1 @@
-{"wav":"cozum2.wav","out":"voice-cozum.wav","timeline":"tl-cozum.json","opts":{"gap":0.5,"lead":0.3,"tail":3.2,"extra_gap":{"1":0.3,"3":0.2,"4":0.3,"5":0.3,"6":0.2,"7":0.6}},
-"lines":[
-{"who":"kuzgun","text":"Dosya on üç: Kırık Vitrin. Bir, iki ya da üç dediysen, tuzağa düştün."},
-{"who":"kuzgun","text":"Cam dışarıdan kırılırsa, kırıklar içeri düşer."},
-{"who":"kuzgun","text":"Ama dükkânın içinde tek parça yoktu. Hepsi kaldırımdaydı."},
-{"who":"kuzgun","text":"Vitrin içeriden kırıldı. İçeride kim vardı?"},
-{"who":"kuzgun","text":"Sikkeler hiç çalınmadı. Nurettin Bey sigorta parasının peşindeydi."},
-{"who":"nurettin","text":"Borç boğazıma kadar gelmişti..."},
-{"who":"kuzgun","text":"Hırsız yok. Sahte soygun: Nurettin. Dosya kapandı."},
-{"who":"kuzgun","text":"Yeni vaka pazartesi akşam on dokuz otuzda."}]}
+{"wav": "cozum2.wav", "out": "voice-cozum.wav", "timeline": "tl-cozum.json", "opts": {"gap": 0.5, "lead": 0.3, "tail": 3.8, "extra_gap": {"1": 0.3, "3": 0.2, "4": 0.3, "5": 0.5, "6": 0.5, "7": 0.8}, "rec_order": [0, 1, 2, 3, 4, 6, 5, 7]}, "lines": [{"who": "kuzgun", "text": "Dosya on üç: Kırık Vitrin. Bir, iki ya da üç dediysen, tuzağa düştün."}, {"who": "kuzgun", "text": "Cam dışarıdan kırılırsa, kırıklar içeri düşer."}, {"who": "kuzgun", "text": "Ama dükkânın içinde tek parça yoktu. Hepsi kaldırımdaydı."}, {"who": "kuzgun", "text": "Vitrin içeriden kırıldı. İçeride kim vardı?"}, {"who": "kuzgun", "text": "Sikkeler hiç çalınmadı. Nurettin Bey sigorta parasının peşindeydi."}, {"who": "nurettin", "text": "Borç boğazıma kadar gelmişti..."}, {"who": "kuzgun", "text": "Hırsız yok. Sahte soygun: Nurettin. Dosya kapandı."}, {"who": "kuzgun", "text": "Yeni vaka pazartesi akşam on dokuz otuzda."}]}
